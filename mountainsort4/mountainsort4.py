@@ -29,7 +29,11 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
         detect_threshold=detect_threshold,
         verbose=verbose
     )
-    tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
+    # Addition for frank_lab: 
+    if 'NWB_DATAJOINT_TMP_DIR' in os.environ:
+        tmpdir = os.environ['NWB_DATAJOINT_TMP_DIR']
+    else:
+        tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
     MS4.setNumWorkers(num_workers)
     if verbose:
         print('Using tmpdir: '+tmpdir)
