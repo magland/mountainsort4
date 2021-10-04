@@ -10,6 +10,6 @@ setup(
         'numpy',
         'h5py',
         'sklearn',
-        'spikeextractors>=0.9.5'
+        'spikeinterface>=0.90'
     ]
 )
