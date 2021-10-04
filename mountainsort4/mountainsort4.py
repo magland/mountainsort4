@@ -6,11 +6,11 @@ import tempfile
 import numpy as np
 import math
 import multiprocessing
-import spikeextractors as se
+import spikeinterface as si
 
 
-def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_size: int=50, adjacency_radius: float=-1, detect_threshold: float=3, detect_interval: int=10,
-                  num_workers: Union[None, int]=None, verbose: bool=True) -> se.SortingExtractor:
+def mountainsort4(*, recording: si.BaseRecording, detect_sign: int, clip_size: int=50, adjacency_radius: float=-1, detect_threshold: float=3, detect_interval: int=10,
+                  num_workers: Union[None, int]=None, verbose: bool=True) -> si.BaseSorting:
     if num_workers is None:
         num_workers = math.floor((multiprocessing.cpu_count()+1)/2)
 
@@ -45,18 +45,14 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
         print('Cleaning tmpdir::::: '+tmpdir)
     shutil.rmtree(tmpdir)
     times, labels, channels = MS4.eventTimesLabelsChannels()
-    output = se.NumpySortingExtractor()
-    output.set_times_labels(times=times, labels=labels)
+    output = si.NumpySorting.from_times_labels(times_list=times, labels_list=labels,
+                                               sampling_frequency=recording.get_sampling_frequency())
     return output
 
 
-def _get_geom_from_recording(recording: se.RecordingExtractor):
-    channel_ids = cast(np.ndarray, recording.get_channel_ids())
-    M = len(channel_ids)
-    location0 = recording.get_channel_property(channel_ids[0], 'location')
-    nd = len(location0)
-    geom = np.zeros((M, nd))
-    for i in range(M):
-        location_i = recording.get_channel_property(channel_ids[i], 'location')
-        geom[i, :] = location_i
+def _get_geom_from_recording(recording: si.BaseRecording):
+    if 'location' in recording.get_property_keys():
+        geom = recording.get_channel_locations()
+    else:
+        raise AttributeError("mountainsort4 needs locations to be added to the recording object")
     return geom
