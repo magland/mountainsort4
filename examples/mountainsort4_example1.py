@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
 import mountainsort4 as ms4
-import spikeextractors as se
+import spikeinterface.extractors as se
 
 def main():
-    recording, sorting_true = se.example_datasets.toy_example()
+    recording, sorting_true = se.toy_example(num_segments=1)
     sorting = ms4.mountainsort4(
         recording=recording,
         detect_sign=-1,

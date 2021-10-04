@@ -627,7 +627,7 @@ class TimeseriesModel_Recording:
         return len(self._recording.get_channel_ids())
 
     def numTimepoints(self):
-        return self._recording.get_num_frames()
+        return self._recording.get_num_samples()
 
     def getChunk(self, *, t1, t2, channels):
         channel_ids = self._recording.get_channel_ids()
@@ -642,14 +642,14 @@ class TimeseriesModel_Recording:
                                                       t2=t2a, channels=channels)
             return ret
         else:
-            return self._recording.get_traces(start_frame=t1, end_frame=t2, channel_ids=channels2)
+            return self._recording.get_traces(start_frame=t1, end_frame=t2, channel_ids=channels2).T
 
 
 def prepare_timeseries_hdf5_from_recording(recording, timeseries_hdf5_fname, *, chunk_size, padding):
     chunk_size_with_padding = chunk_size+2*padding
     with h5py.File(timeseries_hdf5_fname, "w") as f:
         M = len(recording.get_channel_ids())  # Number of channels
-        N = recording.get_num_frames()  # Number of timepoints
+        N = recording.get_num_samples()  # Number of timepoints
         num_chunks = math.ceil(N/chunk_size)
         f.create_dataset('chunk_size', data=[chunk_size])
         f.create_dataset('num_chunks', data=[num_chunks])
@@ -672,7 +672,7 @@ def prepare_timeseries_hdf5_from_recording(recording, timeseries_hdf5_fname, *, 
             aa = padding-(t1-s1)
             # Read the padded chunk
             padded_chunk[:, aa:aa+s2 -
-                         s1] = recording.get_traces(start_frame=s1, end_frame=s2)
+                         s1] = recording.get_traces(start_frame=s1, end_frame=s2).T
 
             for m in range(M):
                 f.create_dataset('part-{}-{}'.format(m, j),
