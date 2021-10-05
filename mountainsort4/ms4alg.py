@@ -9,6 +9,7 @@ import multiprocessing
 import dask
 import dask.multiprocessing
 from ._mdaio_impl import writemda32, writemda64, DiskReadMda, readmda
+import spikeextractors as se
 
 
 import datetime
@@ -618,7 +619,6 @@ class TimeseriesModel_Hdf5:
                         ret[ii, t1a-t1:t2a-t1] = cast(np.ndarray, f[str])[t1a-offset:t2a-offset]
             return ret
 
-
 class TimeseriesModel_Recording:
     def __init__(self, recording):
         self._recording = recording
@@ -631,7 +631,7 @@ class TimeseriesModel_Recording:
 
     def getChunk(self, *, t1, t2, channels):
         channel_ids = self._recording.get_channel_ids()
-        channels2 = np.zeros(len(channels))
+        channels2 = np.zeros(len(channels), dtype=int)
         for i in range(len(channels)):
             channels2[i] = channel_ids[int(channels[i])]
         if (t1 < 0) or (t2 > self.numTimepoints()):
@@ -738,6 +738,7 @@ class MountainSort4:
         self._temporary_directory = None
         self._num_workers = 0
         self._recording = None
+        self._use_recording_directly = False
 
     def setSortingOpts(self, clip_size=None, adjacency_radius=None, detect_sign=None, detect_interval=None,
                        detect_threshold=None, num_features=None, max_num_clips_for_pca=None, verbose=True):
@@ -760,6 +761,9 @@ class MountainSort4:
 
     def setRecording(self, recording):
         self._recording = recording
+    
+    def setUseRecordingDirectly(self, val: bool):
+        self._use_recording_directly = val
 
     def setTimeseriesPath(self, path):
         self._timeseries_path = path
@@ -803,7 +807,9 @@ class MountainSort4:
         hdf5_padding = clip_size*10
         if self._sorting_opts['verbose']:
             print('Preparing {}...'.format(temp_hdf5_path))
-        if self._timeseries_path:
+        if self._use_recording_directly:
+            X = TimeseriesModel_Recording(self._recording)
+        elif self._timeseries_path:
             prepare_timeseries_hdf5(
                 self._timeseries_path, temp_hdf5_path, chunk_size=hdf5_chunk_size, padding=hdf5_padding)
             X = TimeseriesModel_Hdf5(temp_hdf5_path)

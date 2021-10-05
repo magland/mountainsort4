@@ -10,7 +10,7 @@ import spikeextractors as se
 
 
 def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_size: int=50, adjacency_radius: float=-1, detect_threshold: float=3, detect_interval: int=10,
-                  num_workers: Union[None, int]=None, verbose: bool=True) -> se.SortingExtractor:
+                  num_workers: Union[None, int]=None, verbose: bool=True, use_recording_directly: bool=False) -> se.SortingExtractor:
     if num_workers is None:
         num_workers = math.floor((multiprocessing.cpu_count()+1)/2)
 
@@ -34,6 +34,7 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
     if verbose:
         print('Using tmpdir: '+tmpdir)
     MS4.setTemporaryDirectory(tmpdir)
+    MS4.setUseRecordingDirectly(use_recording_directly)
     try:
         MS4.sort()
     except:
