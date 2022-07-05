@@ -13,7 +13,8 @@ def main():
         detect_threshold=3,
         detect_interval=10,
         num_workers=None,
-        verbose=True
+        verbose=True,
+        use_recording_directly=False
     )
     print(f'Found {len(sorting.get_unit_ids())} units')
 
