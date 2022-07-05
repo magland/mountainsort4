@@ -29,9 +29,9 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
         detect_threshold=detect_threshold,
         verbose=verbose
     )
-    # Addition for frank_lab: 
-    if 'NWB_DATAJOINT_TMP_DIR' in os.environ:
-        tmpdir = os.environ['NWB_DATAJOINT_TMP_DIR']
+    # Addition for spyglass; it would be better if this were an option from sortingview: 
+    if 'SPYGLASS_TEMP_DIR' in os.environ:
+        tmpdir = os.environ['SPYGLASS_TEMP_DIR']
     else:
         tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
     MS4.setNumWorkers(num_workers)
