@@ -10,7 +10,7 @@ import spikeextractors as se
 
 
 def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_size: int=50, adjacency_radius: float=-1, detect_threshold: float=3, detect_interval: int=10,
-                  num_workers: Union[None, int]=None, verbose: bool=True, use_recording_directly: bool=False) -> se.SortingExtractor:
+                  num_workers: Union[None, int]=None, verbose: bool=True, use_recording_directly: bool=False, tempdir: Union[str, None]=None) -> se.SortingExtractor:
     if num_workers is None:
         num_workers = math.floor((multiprocessing.cpu_count()+1)/2)
 
@@ -29,23 +29,23 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
         detect_threshold=detect_threshold,
         verbose=verbose
     )
-
-    tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
+    if tempdir is None:
+        tempdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
     MS4.setNumWorkers(num_workers)
     if verbose:
-        print('Using tmpdir: '+tmpdir)
-    MS4.setTemporaryDirectory(tmpdir)
+        print('Using tempdir: '+tempdir)
+    MS4.setTemporaryDirectory(tempdir)
     MS4.setUseRecordingDirectly(use_recording_directly)
     try:
         MS4.sort()
     except:
         if verbose:
-            print('Cleaning tmpdir:: '+tmpdir)
-        shutil.rmtree(tmpdir)
+            print('Cleaning tempdir:: '+tempdir)
+        shutil.rmtree(tempdir)
         raise
     if verbose:
-        print('Cleaning tmpdir::::: '+tmpdir)
-    shutil.rmtree(tmpdir)
+        print('Cleaning tempdir::::: '+tempdir)
+    shutil.rmtree(tempdir)
     times, labels, channels = MS4.eventTimesLabelsChannels()
     output = se.NumpySortingExtractor()
     output.set_times_labels(times=times, labels=labels)
