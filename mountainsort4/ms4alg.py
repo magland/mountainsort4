@@ -486,6 +486,7 @@ class _NeighborhoodSorter:
             if mode=='phase2':
                 if self._sorting_opts['verbose']:
                     print('No duplicate events found for channel {} in {}'.format(self._central_channel,mode))
+                    
         if len(times) != len(np.unique(times)):
             if self._sorting_opts['verbose']:
                 print('WARNING: found {} of {} duplicate events for channel {} in {}'.format(
@@ -493,10 +494,17 @@ class _NeighborhoodSorter:
             times = cast(np.ndarray, np.unique(times))
         else:
             if mode == 'phase2':
-                if self._sorting_opts['verbose']:
-                    print('No duplicate events found for channel {} in {}'.format(
-                        self._central_channel, mode))
-        # times=np.sort(times)
+                #delete spikes from within detection interval
+                for label in np.unique(labels):
+                    unit_spike_ind = np.where(labels == label)[0]
+                    unit_times = times[unit_spike_ind]
+                    invalid = np.where(np.diff(unit_times) < detect_interval)[0]
+                    if len(invalid) != 0:
+                        if self._sorting_opts['verbose']:
+                            print('WARNING: found {} of {} events within detection interval for cluster {}; deleting invalid events'.format(len(invalid),len(times),label))
+                        times = np.delete(times, unit_spike_ind[invalid])
+                        labels = np.delete(labels, unit_spike_ind[invalid])
+
         features = compute_event_features_from_timeseries_model(
             X, times, nbhd_channels=nbhd_channels, clip_size=clip_size, max_num_clips_for_pca=max_num_clips_for_pca, num_features=num_features*2, chunk_infos=chunk_infos)
 
