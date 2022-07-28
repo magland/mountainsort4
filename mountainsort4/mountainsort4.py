@@ -29,11 +29,8 @@ def mountainsort4(*, recording: se.RecordingExtractor, detect_sign: int, clip_si
         detect_threshold=detect_threshold,
         verbose=verbose
     )
-    # Addition for spyglass; it would be better if this were an option from sortingview: 
-    if 'SPYGLASS_TEMP_DIR' in os.environ:
-        tmpdir = tempfile.mkdtemp(dir=os.environ.get('SPYGLASS_TEMP_DIR', '/tmp'))
-    else:
-        tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
+
+    tmpdir = tempfile.mkdtemp(dir=os.environ.get('TEMPDIR', '/tmp'))
     MS4.setNumWorkers(num_workers)
     if verbose:
         print('Using tmpdir: '+tmpdir)
