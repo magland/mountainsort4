@@ -1,5 +1,5 @@
 projectName: mountainsort4
-projectVersion: 1.0.2
+projectVersion: 1.0.3
 projectAuthor: Jeremy Magland
 projectAuthorEmail: jmagland@flatironinstitute.org
 projectDescription: Spike sorting using MountainSort4 algorithm
