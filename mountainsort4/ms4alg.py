@@ -544,6 +544,16 @@ class _NeighborhoodSorter:
                 f.create_dataset('phase1-channel-assignments',
                                  data=channel_assignments2)
         elif mode == 'phase2':
+            #delete spikes from within detection interval
+            for label in np.unique(labels):
+                unit_spike_ind = np.where(labels == label)[0]
+                unit_times = times[unit_spike_ind]
+                invalid = np.where(np.diff(unit_times) < detect_interval)[0]
+                if len(invalid) != 0:
+                    if self._sorting_opts['verbose']:
+                        print('WARNING: found {} of {} events within detection interval for cluster {}; deleting invalid events'.format(len(invalid),len(times),label))
+                    times = np.delete(times, unit_spike_ind[invalid])
+                    labels = np.delete(labels, unit_spike_ind[invalid])
             with h5py.File(self._hdf5_path, "a") as f:
                 f.create_dataset('phase2-times', data=times)
                 f.create_dataset('phase2-labels', data=labels)
