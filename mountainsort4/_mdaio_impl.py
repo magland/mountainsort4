@@ -2,7 +2,6 @@ from typing import List, Union, cast
 import numpy as np
 import struct
 import os
-import requests
 import tempfile
 
 
@@ -147,6 +146,7 @@ def is_url(path: str) -> bool:
 
 
 def _download_bytes_to_tmpfile(url: str, start: int, end: int):
+    import requests
     headers = {"Range": "bytes={}-{}".format(start, end-1)}
     r = requests.get(url, headers=headers, stream=True)
     fd, tmp_fname = tempfile.mkstemp()
