@@ -6,7 +6,7 @@ setup(
     install_requires=[
         'dask',
         'pybind11',
-        'isosplit5==0.1.3',
+        'isosplit5>=0.2.0',
         'numpy',
         'h5py',
         'scikit-learn',
